@@ -1,3 +1,4 @@
+//go:generate mockery --name Repository --output mocks --outpkg mocks --case underscore --dir .
 package domain
 
 import (
@@ -10,6 +11,5 @@ type Repository interface {
 
 // CreateFileArgs to call CreateFile repository method
 type CreateFileArgs struct {
-	FileName string
-	FileData string
+	Query string
 }

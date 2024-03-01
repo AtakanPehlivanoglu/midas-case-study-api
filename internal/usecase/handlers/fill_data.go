@@ -37,17 +37,20 @@ type FillDataRequest struct {
 }
 
 func (h *FillData) HandleRequest(ctx context.Context, request FillDataRequest) error {
+	logger := h.logger
 	filePath := fmt.Sprintf("%v/%v", AssetsPrefix, request.FilePath)
 	fileData := request.FileData
 	// Open the file with read-write access and truncate existing content
 	file, err := os.OpenFile(filePath, os.O_RDWR|os.O_TRUNC, 0666)
 	if err != nil {
+		logger.Error("error opening file", "err", err)
 		return err
 	}
 	defer file.Close()
 
 	_, err = file.Write([]byte(fileData))
 	if err != nil {
+		logger.Error("error writing file", "err", err)
 		return err
 	}
 

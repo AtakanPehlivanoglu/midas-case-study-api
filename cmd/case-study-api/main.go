@@ -19,7 +19,6 @@ const (
 func main() {
 	logger := prepare.SLogger()
 
-	//ctx := context.Background()
 	// init chi router
 	r := chi.NewRouter()
 
@@ -39,12 +38,16 @@ func main() {
 		Db: sqliteDb,
 	})
 	if err != nil {
-		log.Fatalf("error on NewSqliteDb, %v", err)
+		log.Fatalf("error on NewSqliteRepository, %v", err)
 	}
+
+	// ideally this should be retrieved from app configuration
+	shredConfig := prepare.ShredConfig(3, false, false)
 
 	// handlers
 	handlerShred, err := handlers.NewShred(handlers.NewShredArgs{
-		Logger: logger,
+		Logger:      logger,
+		ShredConfig: shredConfig,
 	})
 	if err != nil {
 		log.Fatalf("error on NewShred, %v", err)
@@ -81,7 +84,7 @@ func main() {
 	r.Route("/api/v1", func(r chi.Router) {
 		r.Get(casestudyapi.HealthEndpoint, casestudyapi.Health)
 		r.Route("/file", func(r chi.Router) {
-			r.Get("/shred/{filePath}", implementation.Shred)
+			r.Delete("/shred/{filePath}", implementation.Shred)
 			r.Post("/fill", implementation.FillData)
 			r.Post("/dump", implementation.DumpDb)
 		})

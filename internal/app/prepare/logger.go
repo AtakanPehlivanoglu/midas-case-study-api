@@ -10,7 +10,8 @@ const defaultLogLevel = slog.LevelInfo
 func SLogger() *slog.Logger {
 
 	opts := &slog.HandlerOptions{
-		Level: defaultLogLevel,
+		AddSource: true,
+		Level:     defaultLogLevel,
 	}
 
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))

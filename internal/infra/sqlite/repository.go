@@ -26,6 +26,7 @@ type SqliteRepositoryArgs struct {
 	Db *sql.DB
 }
 
+// CreateFile creates file entity for the table.
 func (s *SqliteDb) CreateFile(ctx context.Context, args domain.CreateFileArgs) error {
 	db := s.db
 
@@ -37,25 +38,21 @@ func (s *SqliteDb) CreateFile(ctx context.Context, args domain.CreateFileArgs) e
 		return fmt.Errorf("%q: %s\n", err, sqlStmt)
 	}
 
-	tx, err := db.Begin()
+	_, err = db.Exec(args.Query)
 	if err != nil {
-		return err
-	}
-	stmt, err := tx.Prepare("insert into file(name, content) values(?, ?)")
-	if err != nil {
-		return fmt.Errorf("%q: %s\n", err, sqlStmt)
-	}
-	defer stmt.Close()
-	for i := 10; i < 20; i++ {
-		_, err = stmt.Exec(i, fmt.Sprintf("test data here: %v", i))
-		if err != nil {
-			return fmt.Errorf("%q: %s\n", err, sqlStmt)
-		}
-	}
-	err = tx.Commit()
-	if err != nil {
-		return fmt.Errorf("%q: %s\n", err, sqlStmt)
+		return fmt.Errorf("%q: %s\n", err, args.Query)
 	}
 
 	return nil
+}
+
+// CreateFileQueryBuilder creates initial insert statement for bulk insert.
+func CreateFileQueryBuilder() string {
+	return fmt.Sprintf("insert into file(name, content) values")
+}
+
+// CreateFileBulkInsertBuilder creates additional insert row for bulk insert.
+func CreateFileBulkInsertBuilder(fileName, fileContent string) string {
+	// build multi line insert
+	return fmt.Sprintf("('%v', '%v'),", fileName, fileContent)
 }

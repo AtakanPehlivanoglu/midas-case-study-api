@@ -1,14 +1,16 @@
 package casestudyapi
 
 import (
+	"fmt"
 	apprequest "github.com/AtakanPehlivanoglu/midas-case-study-api/internal/app/request"
 	"github.com/AtakanPehlivanoglu/midas-case-study-api/internal/app/response"
 	"github.com/AtakanPehlivanoglu/midas-case-study-api/internal/usecase/handlers"
 	"github.com/go-chi/render"
 	"net/http"
+	"path/filepath"
 )
 
-// DumpDb handles /api/v1/file/dump
+// DumpDb handles POST /api/v1/file/dump
 func (i *Implementation) DumpDb(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := i.logger
@@ -16,9 +18,19 @@ func (i *Implementation) DumpDb(w http.ResponseWriter, r *http.Request) {
 	request := &apprequest.DumpDbRequest{}
 
 	if err := render.Bind(r, request); err != nil {
-		logger.Error("error on binding request", "err", err)
+		errMessage := fmt.Errorf("error on binding request")
+		logger.Error(errMessage.Error(), "err", err)
 		w.WriteHeader(http.StatusBadRequest)
-		w.Write(response.ErrInvalidRequest(err))
+		w.Write(response.ErrInvalidRequest(errMessage))
+		return
+	}
+
+	fileExtension := filepath.Ext(request.FilePath)
+	if request.FilePath != "" && fileExtension != FileExtension {
+		errMessage := fmt.Errorf("error on file path, should be either empty or '.txt'")
+		logger.Error(errMessage.Error(), "filePath", request.FilePath)
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(response.ErrInvalidRequest(errMessage))
 		return
 	}
 

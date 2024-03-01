@@ -6,16 +6,22 @@ import (
 	"github.com/AtakanPehlivanoglu/midas-case-study-api/internal/usecase/handlers"
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"path/filepath"
 )
 
-// Shred handles /api/v1/file/shred/{filePath}
+const (
+	FileExtension = ".txt"
+)
+
+// Shred handles DELETE /api/v1/file/shred/{filePath}
 func (i *Implementation) Shred(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	logger := i.logger
 
-	var filePath string
+	filePath := chi.URLParam(r, "filePath")
+	fileExtension := filepath.Ext(filePath)
 
-	if filePath = chi.URLParam(r, "filePath"); filePath == "" {
+	if fileExtension != FileExtension {
 		errMessage := fmt.Errorf("filePath is wrong")
 		logger.Error(errMessage.Error(), "filePath", filePath)
 		w.WriteHeader(http.StatusBadRequest)
